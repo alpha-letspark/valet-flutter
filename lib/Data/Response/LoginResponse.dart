@@ -7,7 +7,7 @@ class LoginResponse {
   String? message;
   String? access_token;
   String? token_type;
-  String? expires_in;
+  int? expires_in;
   LoginData? data;
 
   LoginResponse({
@@ -24,7 +24,7 @@ class LoginResponse {
     String? message,
     String? access_token,
     String? token_type,
-    String? expires_in,
+    int? expires_in,
     LoginData? data,
   }) {
     return LoginResponse(

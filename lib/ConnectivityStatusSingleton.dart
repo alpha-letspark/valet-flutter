@@ -42,12 +42,12 @@ class ConnectionStatusSingleton {
   }
 
   //flutter_connectivity's listener
-  void _connectionChange(ConnectivityResult result) {
-    bool isConnected = result != ConnectivityResult.none;
+  void _connectionChange(List<ConnectivityResult> result) {
+    bool isConnected = result.contains(ConnectivityResult.none) == false;
 
-    if (!connectionChangeController.isClosed)
+     if (!connectionChangeController.isClosed) {
       connectionChangeController.add(isConnected);
-
+    }
     checkConnection();
   }
 

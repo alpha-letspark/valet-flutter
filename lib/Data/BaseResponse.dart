@@ -1,7 +1,7 @@
 import 'package:valet_app/Data/ServerError.dart';
 
 class BaseResponse<T> {
-  late ServerError _error;
+  ServerError? _error;
   T? data;
 
   setException(ServerError error) {
@@ -12,15 +12,9 @@ class BaseResponse<T> {
     this.data = data;
   }
 
-  get errorCode {
-    return _error.getErrorCode();
-  }
+  int get errorCode => _error?.getErrorCode() ?? 0;
 
-  get getException {
-    return _error.getErrorMessage();
-  }
+  String get getException => _error?.getErrorMessage() ?? "";
 
-  get getServerError {
-    return _error.serverErrorData;
-  }
+  ServerError? get serverError => _error;
 }

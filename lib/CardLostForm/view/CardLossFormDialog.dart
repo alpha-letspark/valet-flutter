@@ -57,7 +57,7 @@ class _CardLossFormDialogState extends State<CardLossFormDialog>
   @override
   Widget build(BuildContext context) {
     if (!isInit) {
-      errorColor ??= Theme.of(context).errorColor;
+      errorColor ??= Theme.of(context).colorScheme.error ;
       blackColor ??= Colors.black;
 
       isInit = true;

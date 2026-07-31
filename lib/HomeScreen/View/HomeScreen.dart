@@ -159,6 +159,8 @@ class _HomeScreenNewState extends State<HomeScreenNew>
         isMenuClick = false;
         isCheckInOutClick = true;
         checkInOutWidget?.clearSelection();
+        newVehicleEntryWidget?.refresh();
+        //newVehicleEntryWidget?.onVehicleAdded
       });
     }
   }

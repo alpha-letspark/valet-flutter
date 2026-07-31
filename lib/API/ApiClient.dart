@@ -12,6 +12,7 @@ import 'package:valet_app/Data/Request/ParkedLocationUpdate.dart';
 import 'package:valet_app/Data/Request/RolePermissionRequest.dart';
 import 'package:valet_app/Data/Request/SMSBasedEntryRequest.dart';
 import 'package:valet_app/Data/Request/SMSBasedUpdateRequest.dart';
+import 'package:valet_app/Data/Request/SaveDeviceTokenRequest.dart';
 import 'package:valet_app/Data/Request/SearchGuestRequest.dart';
 import 'package:valet_app/Data/Response/CheckHookNumberResponse.dart';
 import 'package:valet_app/Data/Response/DriverListResponse.dart';
@@ -27,6 +28,7 @@ import 'package:valet_app/Data/Response/ParkingDetailsResponse.dart';
 import 'package:valet_app/Data/Response/ParkingLocationResponse.dart';
 import 'package:valet_app/Data/Response/PermissionResponse.dart';
 import 'package:valet_app/Data/Response/RolePermissionResponse.dart';
+import 'package:valet_app/Data/Response/SaveDeviceTokenResponse.dart';
 import 'package:valet_app/Data/Response/SearchGuestResponse.dart';
 import 'package:valet_app/Data/Response/SignatureResponse.dart';
 import 'package:valet_app/Data/Response/SlotsResponse.dart';
@@ -53,7 +55,17 @@ import '../Data/Response/UploadSignatureResponse.dart';
 
 part 'ApiClient.g.dart';
 
-@RestApi(baseUrl: 'https://dev.letspark.in/api/valet/api')
+
+//for local testing i chnaged to lacaly..
+
+@RestApi(baseUrl: "https://letsdriev.in/dev/valet/api")
+
+//@RestApi(baseUrl: "http://10.136.86.137:8000/api")
+
+// @RestApi(baseUrl: 'https://dev.letspark.in/api/valet/api')
+//@RestApi(baseUrl: 'https://valetapp.letspark.in/apps')
+//@RestApi(baseUrl: 'https://letspark.in/dev/valet/apps')
+
 abstract class ApiClient {
   factory ApiClient(Dio dio) {
     return _ApiClient(dio);
@@ -266,4 +278,8 @@ abstract class ApiClient {
       @Part(name: "mobile") String mobile,
       @Part(name: "fine_amount") String fineAmount,
       @Part(name: "aadhaar") File aadhar);
+
+      @POST("/save-device-token")
+    Future<SaveDeviceTokenResponse> saveDeviceToken(
+      @Body() SaveDeviceTokenRequest request);
 }

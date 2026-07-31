@@ -84,7 +84,10 @@ class _MyAppState extends State<MyApp> {
 
   void handleOneSignalData() {
     OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
-    OneSignal.initialize("43309152-c9d5-44d0-bb7a-94f566105564");
+    //OneSignal.initialize("43309152-c9d5-44d0-bb7a-94f566105564"); ravi
+    //OneSignal.initialize("1624bd34-5344-453e-83dc-1f7daa9d13da"); //kanisha
+    OneSignal.initialize("9099585a-a6be-4be9-942b-8ff4d2dc970c"); //DOC
+    OneSignal.Notifications.requestPermission(true);
 
     OneSignal.Notifications.addClickListener((event) async {
       bool canPop = Navigator.of(navigatorKey.currentState!.context).canPop();

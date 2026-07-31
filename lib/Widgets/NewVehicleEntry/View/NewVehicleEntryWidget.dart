@@ -123,7 +123,7 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
 
   @override
   Widget build(BuildContext context) {
-    errorColor ??= Theme.of(context).errorColor;
+    errorColor ??= Theme.of(context).colorScheme.error;
     blackColor ??= Colors.black;
 
     return SingleChildScrollView(
@@ -246,51 +246,82 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                   padding: const EdgeInsets.only(top: 8.0),
                   child: SizedBox(
                     height: 50,
-                    child: TypeAheadFormField(
-                      noItemsFoundBuilder: (context) {
+                    child: TypeAheadField(
+                      controller: vehicalNumberController,
+                      // Renamed from noItemsFoundBuilder
+                      emptyBuilder: (context) {
                         return const SizedBox();
                       },
-                      getImmediateSuggestions: true,
+                      // getImmediateSuggestions is removed. The functionality is maintained by
+                      // the current suggestionsCallback logic (return [] if pattern.isEmpty).
+
+                      // autoFlipDirection remains the same
                       autoFlipDirection: true,
-                      textFieldConfiguration: TextFieldConfiguration(
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'[a-zA-Z0-9]')),
-                        ],
-                        maxLength: 10,
-                        controller: vehicalNumberController,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelStyle: vehicleNumberError
-                              ? TextStyle(color: errorColor)
-                              : TextStyle(color: blackColor),
-                          errorText:
-                              vehicleNumberError ? mandetoryFieldError : null,
-                          counter: const SizedBox(),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 10),
-                          filled: true,
-                          hintText: 'KA01MM1234',
-                          fillColor: Colors.white,
-                          hintStyle: const TextStyle(fontSize: 12),
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black38),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColorDark,
+
+                      // --- TextField Configuration Migration ---
+                      // Replaced textFieldConfiguration with the required 'builder' property.
+                      // Must use the provided controller and focusNode on the inner TextFormField.
+                      builder: (context, vehicalNumberController, focusNode) {
+                        return TextFormField(
+                          // Keep inputFormatters and maxLength on the TextFormField
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[a-zA-Z0-9]')),
+                          ],
+                          maxLength: 10,
+
+                          controller:
+                              vehicalNumberController, // Use the provided controller
+                          focusNode: focusNode, // Use the provided focusNode
+                          textInputAction: TextInputAction.next,
+
+                          decoration: InputDecoration(
+                            labelStyle: vehicleNumberError
+                                ? TextStyle(color: errorColor)
+                                : TextStyle(color: blackColor),
+                            errorText:
+                                vehicleNumberError ? mandetoryFieldError : null,
+                            counter:
+                                const SizedBox(), // Replaces the counter from TextFieldConfiguration
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            filled: true,
+                            hintText: 'KA01MM1234',
+                            fillColor: Colors.white,
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black38),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColorDark,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      suggestionsBoxDecoration: const SuggestionsBoxDecoration(
-                          hasScrollbar: true, color: Colors.white),
+                        );
+                      },
+
+                      // --- Suggestions Box Decoration Migration ---
+                      // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
+                      decorationBuilder: (context, child) {
+                        // Recreating the old SuggestionsBoxDecoration appearance (color and presumed scrollbar)
+                        return Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),
+                          child: child, // The actual list of suggestions
+                        );
+                      },
+
+                      // suggestionsCallback remains the same
                       suggestionsCallback: (pattern) {
                         if (pattern.isNotEmpty) {
                           return _presenter.searchGuestDetails(pattern);
                         }
                         return [];
                       },
+
+                      // itemBuilder remains the same
                       itemBuilder: (context, dynamic suggestion) {
                         return suggestion != null
                             ? ListTile(
@@ -298,9 +329,12 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                               )
                             : const SizedBox();
                       },
-                      onSuggestionSelected: (dynamic suggestion) {
+
+                      // Renamed from onSuggestionSelected to onSelected
+                      onSelected: (dynamic suggestion) {
                         if (mounted) setState(() {});
-                        //Navigator.of(context).pop(suggestion);
+
+                        // Suggestion logic preserved
                         SearchGuestData data = suggestion;
                         mobileNumberController.text = data.mobile_number ?? "";
                         nameController.text = data.customer_name ?? '';
@@ -309,6 +343,14 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                         vehicalNumberController.text =
                             data.vehicle_number ?? '';
                       },
+
+                      // Validator is required for FormField widgets, even if it returns null
+                      // As requested, this will be omitted, but note that a FormField **requires** a validator
+                      // if you place it inside a Form widget. If not in a Form, it's safe to omit.
+
+                      // validator: (value) {
+                      //   return null;
+                      // },
                     ),
                   ),
                 ),
@@ -425,58 +467,88 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                   padding: const EdgeInsets.only(top: 8.0),
                   child: SizedBox(
                     height: 50,
-                    child: TypeAheadFormField(
-                      noItemsFoundBuilder: (context) {
+                    child: TypeAheadField(
+                      controller: vehicleNameController,
+                      // Renamed from noItemsFoundBuilder
+                      emptyBuilder: (context) {
                         return const SizedBox();
                       },
-                      getImmediateSuggestions: true,
+                      // getImmediateSuggestions is removed. The functionality is handled by the
+                      // suggestionsCallback logic.
+
+                      // autoFlipDirection remains the same
                       autoFlipDirection: true,
-                      textFieldConfiguration: TextFieldConfiguration(
-                        controller: vehicleNameController,
-                        textInputAction: TextInputAction.next,
-                        onChanged: (text) {
-                          if (vehicleNameError && text != '') {
-                            vehicleNameError = false;
-                            setState(() {});
-                          }
-                        },
-                        decoration: InputDecoration(
-                          labelStyle: vehicleNameError
-                              ? TextStyle(color: errorColor)
-                              : TextStyle(color: blackColor),
-                          errorText:
-                              vehicleNameError ? mandetoryFieldError : null,
-                          counter: const SizedBox(),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 10),
-                          filled: true,
-                          hintText: Strings.VEHICLE_NAME,
-                          fillColor: Colors.white,
-                          hintStyle: const TextStyle(fontSize: 12),
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black38),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColorDark,
+
+                      // --- TextField Configuration Migration ---
+                      // Replaced textFieldConfiguration with the required 'builder' property.
+                      // Must use the provided controller and focusNode on the inner TextFormField.
+                      builder: (context, vehicleNameController, focusNode) {
+                        return TextFormField(
+                          controller:
+                              vehicleNameController, // Use the provided controller
+                          focusNode: focusNode, // Use the provided focusNode
+                          textInputAction: TextInputAction.next,
+                          onChanged: (text) {
+                            if (vehicleNameError && text != '') {
+                              vehicleNameError = false;
+                              // Assuming setState is available in the surrounding State
+                              setState(() {});
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelStyle: vehicleNameError
+                                ? TextStyle(color: errorColor)
+                                : TextStyle(color: blackColor),
+                            errorText:
+                                vehicleNameError ? mandetoryFieldError : null,
+                            counter: const SizedBox(),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            filled: true,
+                            hintText: Strings.VEHICLE_NAME,
+                            fillColor: Colors.white,
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black38),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColorDark,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      suggestionsBoxDecoration: const SuggestionsBoxDecoration(
-                          hasScrollbar: true, color: Colors.white),
+                        );
+                      },
+
+                      // --- Suggestions Box Decoration Migration ---
+                      // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
+                      decorationBuilder: (context, child) {
+                        // Recreating the old SuggestionsBoxDecoration appearance (white color)
+                        return Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),
+                          child: child, // The actual list of suggestions
+                        );
+                      },
+
+                      // suggestionsCallback remains the same
                       suggestionsCallback: (pattern) {
                         if (pattern.isNotEmpty) {
                           return _presenter.suggestVehicleName(pattern);
                         }
                         return [];
                       },
+
+                      // itemBuilder remains the same
                       itemBuilder: (context, dynamic suggestion) {
                         return suggestion != null
                             ? ListTile(title: Text(suggestion.name ?? ""))
                             : const SizedBox();
                       },
-                      onSuggestionSelected: (dynamic suggestion) {
+
+                      // Renamed from onSuggestionSelected to onSelected
+                      onSelected: (dynamic suggestion) {
                         vehicleNameController.text = suggestion.name;
                         if (mounted) setState(() {});
                       },
@@ -498,58 +570,88 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                   padding: const EdgeInsets.only(top: 8.0),
                   child: SizedBox(
                     height: 50,
-                    child: TypeAheadFormField(
-                      noItemsFoundBuilder: (context) {
+                    child: TypeAheadField(
+                      controller: vehicleColorController,
+                      // Renamed from noItemsFoundBuilder
+                      emptyBuilder: (context) {
                         return const SizedBox();
                       },
-                      getImmediateSuggestions: true,
+                      // getImmediateSuggestions is removed. The functionality is handled by the
+                      // suggestionsCallback logic.
+
+                      // autoFlipDirection remains the same
                       autoFlipDirection: true,
-                      textFieldConfiguration: TextFieldConfiguration(
-                        onChanged: (text) {
-                          if (vehicleColorError && text != '') {
-                            vehicleColorError = false;
-                            setState(() {});
-                          }
-                        },
-                        controller: vehicleColorController,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelStyle: vehicleColorError
-                              ? TextStyle(color: errorColor)
-                              : TextStyle(color: blackColor),
-                          errorText:
-                              vehicleColorError ? mandetoryFieldError : null,
-                          counter: const SizedBox(),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 10),
-                          filled: true,
-                          hintText: Strings.VEHICLE_COLOR,
-                          fillColor: Colors.white,
-                          hintStyle: const TextStyle(fontSize: 12),
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black38),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColorDark,
+
+                      // --- TextField Configuration Migration ---
+                      // Replaced textFieldConfiguration with the required 'builder' property.
+                      // Must use the provided controller and focusNode on the inner TextFormField.
+                      builder: (context, vehicleColorController, focusNode) {
+                        return TextFormField(
+                          controller:
+                              vehicleColorController, // Use the provided controller
+                          focusNode: focusNode, // Use the provided focusNode
+                          textInputAction: TextInputAction.next,
+                          onChanged: (text) {
+                            if (vehicleColorError && text != '') {
+                              vehicleColorError = false;
+                              // Assuming setState is available in the surrounding State
+                              setState(() {});
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelStyle: vehicleColorError
+                                ? TextStyle(color: errorColor)
+                                : TextStyle(color: blackColor),
+                            errorText:
+                                vehicleColorError ? mandetoryFieldError : null,
+                            counter: const SizedBox(),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            filled: true,
+                            hintText: Strings.VEHICLE_COLOR,
+                            fillColor: Colors.white,
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black38),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColorDark,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      suggestionsBoxDecoration: const SuggestionsBoxDecoration(
-                          hasScrollbar: true, color: Colors.white),
+                        );
+                      },
+
+                      // --- Suggestions Box Decoration Migration ---
+                      // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
+                      decorationBuilder: (context, child) {
+                        // Recreating the old SuggestionsBoxDecoration appearance (white color)
+                        return Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),
+                          child: child, // The actual list of suggestions
+                        );
+                      },
+
+                      // suggestionsCallback remains the same
                       suggestionsCallback: (pattern) {
                         if (pattern.isNotEmpty) {
                           return _presenter.suggestVehicleColor(pattern);
                         }
                         return [];
                       },
+
+                      // itemBuilder remains the same
                       itemBuilder: (context, dynamic suggestion) {
                         return suggestion != null
                             ? ListTile(title: Text(suggestion.color_name ?? ""))
                             : const SizedBox();
                       },
-                      onSuggestionSelected: (dynamic suggestion) {
+
+                      // Renamed from onSuggestionSelected to onSelected
+                      onSelected: (dynamic suggestion) {
                         vehicleColorController.text =
                             suggestion.color_name ?? '';
                         if (mounted) setState(() {});
@@ -746,6 +848,9 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                       children: [
                         ElevatedButton(
                             onPressed: () {
+                              if(signatureFile!=null){
+                                return;
+                              }
                               gotoSignatureScreen();
                             },
                             child: const Text(Strings.TAKE_SIGNATURE)),
@@ -1210,47 +1315,76 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                           Expanded(
                             child: SizedBox(
                               height: 45,
-                              child: TypeAheadFormField(
-                                noItemsFoundBuilder: (context) {
+                              child: TypeAheadField(
+                                controller: slotsController,
+                                // Renamed from noItemsFoundBuilder
+                                emptyBuilder: (context) {
                                   return const SizedBox();
                                 },
-                                getImmediateSuggestions: true,
+                                // getImmediateSuggestions is removed. It's implicitly handled since
+                                // suggestionsCallback returns a list unconditionally.
+
+                                // autoFlipDirection remains the same
                                 autoFlipDirection: true,
-                                textFieldConfiguration: TextFieldConfiguration(
-                                  controller: slotsController,
-                                  onChanged: (text) {
-                                    if (slotsError && text != '') {
-                                      slotsError = false;
-                                      setState(() {});
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                    labelStyle: slotsError
-                                        ? TextStyle(color: errorColor)
-                                        : TextStyle(color: blackColor),
-                                    errorText:
-                                        slotsError ? mandetoryFieldError : null,
-                                    hintText: 'Type',
-                                    hintStyle: const TextStyle(fontSize: 12),
-                                    border: const OutlineInputBorder(
-                                        borderSide:
-                                            BorderSide(color: Colors.black38)),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color:
-                                            Theme.of(context).primaryColorDark,
+
+                                // --- TextField Configuration Migration ---
+                                // Replaced textFieldConfiguration with the required 'builder' property.
+                                builder: (context, slotsController, focusNode) {
+                                  return TextFormField(
+                                    controller:
+                                        slotsController, // Use the provided controller
+                                    focusNode:
+                                        focusNode, // Use the provided focusNode
+                                    onChanged: (text) {
+                                      if (slotsError && text != '') {
+                                        slotsError = false;
+                                        // Assuming setState is available in the surrounding State
+                                        setState(() {});
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      labelStyle: slotsError
+                                          ? TextStyle(color: errorColor)
+                                          : TextStyle(color: blackColor),
+                                      errorText: slotsError
+                                          ? mandetoryFieldError
+                                          : null,
+                                      hintText: 'Type',
+                                      hintStyle: const TextStyle(fontSize: 12),
+                                      border: const OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.black38)),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Theme.of(context)
+                                              .primaryColorDark,
+                                        ),
                                       ),
+                                      counter:
+                                          const Offstage(), // Hides the character counter
                                     ),
-                                    counter: const Offstage(),
-                                  ),
-                                ),
-                                suggestionsBoxDecoration:
-                                    const SuggestionsBoxDecoration(
-                                        hasScrollbar: true,
-                                        color: Colors.white),
+                                  );
+                                },
+
+                                // --- Suggestions Box Decoration Migration ---
+                                // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
+                                decorationBuilder: (context, child) {
+                                  // Recreating the old SuggestionsBoxDecoration appearance (white color)
+                                  return Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                    ),
+                                    child:
+                                        child, // The actual list of suggestions
+                                  );
+                                },
+
+                                // suggestionsCallback remains the same (returns all items immediately)
                                 suggestionsCallback: (pattern) {
                                   return slotsList;
                                 },
+
+                                // itemBuilder remains the same
                                 itemBuilder: (context, dynamic suggestion) {
                                   return suggestion != null
                                       ? ListTile(
@@ -1258,7 +1392,9 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                                         )
                                       : const SizedBox();
                                 },
-                                onSuggestionSelected: (dynamic suggestion) {
+
+                                // Renamed from onSuggestionSelected to onSelected
+                                onSelected: (dynamic suggestion) {
                                   slotsController.text = suggestion.name ?? "";
                                 },
                               ),
@@ -1665,7 +1801,7 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Visibility(
+            Visibility( 
               //visible: false,
               visible: checkCardBaseField(Strings.MAND_VEHICLE_SCAN),
               child: Expanded(
@@ -1679,11 +1815,12 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                       if (mounted) {
                         setState(() {
                           isScanClicked = true;
+                           scanNumberPlate();
                         });
                       }
                     },
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         InkWell(
                             child: isScanClicked
@@ -1721,71 +1858,106 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                   padding: const EdgeInsets.only(top: 8.0),
                   child: SizedBox(
                     height: 50,
-                    child: TypeAheadFormField(
-                      noItemsFoundBuilder: (context) {
+                    child: TypeAheadField(
+                      controller: vehicalNumberController,
+                      // Renamed from noItemsFoundBuilder
+                      emptyBuilder: (context) {
                         return const SizedBox();
                       },
-                      getImmediateSuggestions: true,
+                      // getImmediateSuggestions is removed. Logic remains the same (suggestions only on non-empty pattern).
+
+                      // autoFlipDirection remains the same
                       autoFlipDirection: true,
-                      textFieldConfiguration: TextFieldConfiguration(
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'[a-zA-Z0-9]')),
-                        ],
-                        maxLength: 10,
-                        controller: vehicalNumberController,
-                        textInputAction: TextInputAction.next,
-                        onChanged: (value) {
-                          if (vehicleNumberError && value != '') {
-                            vehicleNumberError = false;
-                            setState(() {});
-                          }
-                        },
-                        decoration: InputDecoration(
-                          labelStyle: vehicleNumberError
-                              ? TextStyle(color: errorColor)
-                              : TextStyle(color: blackColor),
-                          errorText:
-                              vehicleNumberError ? mandetoryFieldError : null,
-                          counter: const SizedBox(),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 10),
-                          filled: true,
-                          hintText: 'KA01MM1234',
-                          fillColor: Colors.white,
-                          hintStyle: const TextStyle(fontSize: 12),
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black38),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColorDark,
+
+                      // --- TextField Configuration Migration ---
+                      // Replaced textFieldConfiguration with the required 'builder' property.
+                      builder: (context, vehicalNumberController, focusNode) {
+                        return TextFormField(
+                          // Keep properties that define input behavior
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[a-zA-Z0-9]')),
+                          ],
+                          maxLength: 10,
+
+                          controller:
+                              vehicalNumberController, // Use the provided controller
+                          focusNode: focusNode, // Use the provided focusNode
+                          textInputAction: TextInputAction.next,
+
+                          onChanged: (value) {
+                            if (vehicleNumberError && value != '') {
+                              vehicleNumberError = false;
+                              // Assuming setState is available in the surrounding State
+                              setState(() {});
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelStyle: vehicleNumberError
+                                ? TextStyle(color: errorColor)
+                                : TextStyle(color: blackColor),
+                            errorText:
+                                vehicleNumberError ? mandetoryFieldError : null,
+                            counter:
+                                const SizedBox(), // Replaces the counter from TextFieldConfiguration
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            filled: true,
+                            hintText: 'KA01MM1234',
+                            fillColor: Colors.white,
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black38),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColorDark,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      suggestionsBoxDecoration: const SuggestionsBoxDecoration(
-                          hasScrollbar: true, color: Colors.white),
+                        );
+                      },
+
+                      // --- Suggestions Box Decoration Migration ---
+                      // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
+                      decorationBuilder: (context, child) {
+                        return Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),
+                          child: child, // The actual list of suggestions
+                        );
+                      },
+
+                      // suggestionsCallback remains the same
                       suggestionsCallback: (pattern) {
                         if (pattern.isNotEmpty) {
                           return _presenter.searchGuestDetails(pattern);
                         }
                         return [];
                       },
+
+                      // itemBuilder remains the same
                       itemBuilder: (context, dynamic suggestion) {
                         return suggestion != null
                             ? ListTile(
                                 title: Text(suggestion.display_string ?? ""))
                             : const SizedBox();
                       },
-                      onSuggestionSelected: (dynamic suggestion) {
+
+                      // Renamed from onSuggestionSelected to onSelected
+                      onSelected: (dynamic suggestion) {
                         if (mounted) setState(() {});
-                        //Navigator.of(context).pop(suggestion);g
+
+                        // Suggestion logic preserved
+                        // NOTE: You'll need access to SearchGuestData, selectedCarIndex, and the other controllers
+                        // (mobileNumberController, nameController) outside this widget to use this logic fully.
                         SearchGuestData data = suggestion;
+                        // mobileNumberController.text = data.mobile_number ?? ""; // Commented out as these controllers were not in the provided snippet's scope
+                        // nameController.text = data.customer_name ?? '';
                         selectedCarIndex =
                             int.tryParse(data.vehicle_type ?? '0') ?? 0;
-                        vehicalNumberController.text =
-                            data.vehicle_number ?? '';
+                        vehicalNumberController.text =  data.vehicle_number ?? '';
                       },
                     ),
                   ),
@@ -1892,58 +2064,87 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                   padding: const EdgeInsets.only(top: 8.0),
                   child: SizedBox(
                     height: 50,
-                    child: TypeAheadFormField(
-                      noItemsFoundBuilder: (context) {
+                    child: TypeAheadField(
+                      controller: vehicleNameController,
+                      // Renamed from noItemsFoundBuilder
+                      emptyBuilder: (context) {
                         return const SizedBox();
                       },
-                      getImmediateSuggestions: true,
+                      // getImmediateSuggestions is removed. The functionality is handled by the
+                      // suggestionsCallback logic.
+
+                      // autoFlipDirection remains the same
                       autoFlipDirection: true,
-                      textFieldConfiguration: TextFieldConfiguration(
-                        onChanged: (value) {
-                          if (vehicleNameError && value != '') {
-                            vehicleNameError = false;
-                            setState(() {});
-                          }
-                        },
-                        controller: vehicleNameController,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelStyle: vehicleNameError
-                              ? TextStyle(color: errorColor)
-                              : TextStyle(color: blackColor),
-                          errorText:
-                              vehicleNameError ? mandetoryFieldError : null,
-                          counter: const SizedBox(),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 10),
-                          filled: true,
-                          hintText: Strings.VEHICLE_NAME,
-                          fillColor: Colors.white,
-                          hintStyle: const TextStyle(fontSize: 12),
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black38),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColorDark,
+
+                      // --- TextField Configuration Migration ---
+                      // Replaced textFieldConfiguration with the required 'builder' property.
+                      builder: (context, vehicleNameController, focusNode) {
+                        return TextFormField(
+                          controller:
+                              vehicleNameController, // Use the provided controller
+                          focusNode: focusNode, // Use the provided focusNode
+                          textInputAction: TextInputAction.next,
+                          onChanged: (value) {
+                            if (vehicleNameError && value != '') {
+                              vehicleNameError = false;
+                              // Assuming setState is available in the surrounding State
+                              setState(() {});
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelStyle: vehicleNameError
+                                ? TextStyle(color: errorColor)
+                                : TextStyle(color: blackColor),
+                            errorText:
+                                vehicleNameError ? mandetoryFieldError : null,
+                            counter: const SizedBox(),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            filled: true,
+                            hintText: Strings.VEHICLE_NAME,
+                            fillColor: Colors.white,
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black38),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColorDark,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      suggestionsBoxDecoration: const SuggestionsBoxDecoration(
-                          hasScrollbar: true, color: Colors.white),
+                        );
+                      },
+
+                      // --- Suggestions Box Decoration Migration ---
+                      // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
+                      decorationBuilder: (context, child) {
+                        // Recreating the old SuggestionsBoxDecoration appearance (white color)
+                        return Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),
+                          child: child, // The actual list of suggestions
+                        );
+                      },
+
+                      // suggestionsCallback remains the same
                       suggestionsCallback: (pattern) {
                         if (pattern.isNotEmpty) {
                           return _presenter.suggestVehicleName(pattern);
                         }
                         return [];
                       },
+
+                      // itemBuilder remains the same
                       itemBuilder: (context, dynamic suggestion) {
                         return suggestion != null
                             ? ListTile(title: Text(suggestion.name ?? ""))
                             : const SizedBox();
                       },
-                      onSuggestionSelected: (dynamic suggestion) {
+
+                      // Renamed from onSuggestionSelected to onSelected
+                      onSelected: (dynamic suggestion) {
                         vehicleNameController.text = suggestion.name;
                         if (mounted) setState(() {});
                       },
@@ -1965,58 +2166,87 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                   padding: const EdgeInsets.only(top: 8.0),
                   child: SizedBox(
                     height: 50,
-                    child: TypeAheadFormField(
-                      noItemsFoundBuilder: (context) {
+                    child: TypeAheadField(
+                      controller: vehicleColorController,
+                      // Renamed from noItemsFoundBuilder
+                      emptyBuilder: (context) {
                         return const SizedBox();
                       },
-                      getImmediateSuggestions: true,
+                      // getImmediateSuggestions is removed. The functionality is handled by the
+                      // suggestionsCallback logic.
+
+                      // autoFlipDirection remains the same
                       autoFlipDirection: true,
-                      textFieldConfiguration: TextFieldConfiguration(
-                        onChanged: (value) {
-                          if (vehicleColorError && value != '') {
-                            vehicleColorError = false;
-                            setState(() {});
-                          }
-                        },
-                        controller: vehicleColorController,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelStyle: vehicleColorError
-                              ? TextStyle(color: errorColor)
-                              : TextStyle(color: blackColor),
-                          errorText:
-                              vehicleColorError ? mandetoryFieldError : null,
-                          counter: const SizedBox(),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 10),
-                          filled: true,
-                          hintText: Strings.VEHICLE_COLOR,
-                          fillColor: Colors.white,
-                          hintStyle: const TextStyle(fontSize: 12),
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black38),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColorDark,
+
+                      // --- TextField Configuration Migration ---
+                      // Replaced textFieldConfiguration with the required 'builder' property.
+                      builder: (context, vehicleColorController, focusNode) {
+                        return TextFormField(
+                          controller:
+                              vehicleColorController, // Use the provided controller
+                          focusNode: focusNode, // Use the provided focusNode
+                          textInputAction: TextInputAction.next,
+                          onChanged: (value) {
+                            if (vehicleColorError && value != '') {
+                              vehicleColorError = false;
+                              // Assuming setState is available in the surrounding State
+                              setState(() {});
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelStyle: vehicleColorError
+                                ? TextStyle(color: errorColor)
+                                : TextStyle(color: blackColor),
+                            errorText:
+                                vehicleColorError ? mandetoryFieldError : null,
+                            counter: const SizedBox(),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            filled: true,
+                            hintText: Strings.VEHICLE_COLOR,
+                            fillColor: Colors.white,
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black38),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColorDark,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      suggestionsBoxDecoration: const SuggestionsBoxDecoration(
-                          hasScrollbar: true, color: Colors.white),
+                        );
+                      },
+
+                      // --- Suggestions Box Decoration Migration ---
+                      // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
+                      decorationBuilder: (context, child) {
+                        // Recreating the old SuggestionsBoxDecoration appearance (white color)
+                        return Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),
+                          child: child, // The actual list of suggestions
+                        );
+                      },
+
+                      // suggestionsCallback remains the same
                       suggestionsCallback: (pattern) {
                         if (pattern.isNotEmpty) {
                           return _presenter.suggestVehicleColor(pattern);
                         }
                         return [];
                       },
+
+                      // itemBuilder remains the same
                       itemBuilder: (context, dynamic suggestion) {
                         return suggestion != null
                             ? ListTile(title: Text(suggestion.color_name ?? ""))
                             : const SizedBox();
                       },
-                      onSuggestionSelected: (dynamic suggestion) {
+
+                      // Renamed from onSuggestionSelected to onSelected
+                      onSelected: (dynamic suggestion) {
                         vehicleColorController.text =
                             suggestion.color_name ?? '';
                         if (mounted) setState(() {});
@@ -2215,6 +2445,9 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                 children: [
                   ElevatedButton(
                       onPressed: () {
+                              if(signatureFile!=null){
+                                return;
+                              }
                         gotoSignatureScreen();
                       },
                       child: const Text(Strings.TAKE_SIGNATURE)),
@@ -2568,45 +2801,75 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                           Expanded(
                               child: SizedBox(
                             height: 45,
-                            child: TypeAheadFormField(
-                              noItemsFoundBuilder: (context) {
+                            child: TypeAheadField(
+                              controller: slotsController,
+                              // Renamed from noItemsFoundBuilder
+                              emptyBuilder: (context) {
                                 return const SizedBox();
                               },
-                              getImmediateSuggestions: true,
+                              // getImmediateSuggestions is removed. Since suggestionsCallback returns slotsList
+                              // unconditionally, the behavior (suggestions appear on focus) is implicitly maintained.
+
+                              // autoFlipDirection remains the same
                               autoFlipDirection: true,
-                              textFieldConfiguration: TextFieldConfiguration(
-                                controller: slotsController,
-                                onChanged: (text) {
-                                  if (slotsError && text != '') {
-                                    slotsError = false;
-                                    setState(() {});
-                                  }
-                                },
-                                decoration: InputDecoration(
-                                  labelStyle: slotsError
-                                      ? TextStyle(color: errorColor)
-                                      : TextStyle(color: blackColor),
-                                  errorText:
-                                      slotsError ? mandetoryFieldError : null,
-                                  hintText: 'Type',
-                                  hintStyle: const TextStyle(fontSize: 12),
-                                  border: const OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.black38)),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColorDark,
+
+                              // --- TextField Configuration Migration ---
+                              // Replaced textFieldConfiguration with the required 'builder' property.
+                              builder: (context, slotsController, focusNode) {
+                                return TextFormField(
+                                  controller:
+                                      slotsController, // Use the provided controller
+                                  focusNode:
+                                      focusNode, // Use the provided focusNode
+                                  onChanged: (text) {
+                                    if (slotsError && text != '') {
+                                      slotsError = false;
+                                      // Assuming setState is available in the surrounding State
+                                      setState(() {});
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    labelStyle: slotsError
+                                        ? TextStyle(color: errorColor)
+                                        : TextStyle(color: blackColor),
+                                    errorText:
+                                        slotsError ? mandetoryFieldError : null,
+                                    hintText: 'Type',
+                                    hintStyle: const TextStyle(fontSize: 12),
+                                    border: const OutlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black38)),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color:
+                                            Theme.of(context).primaryColorDark,
+                                      ),
                                     ),
+                                    counter:
+                                        const Offstage(), // Hides the character counter
                                   ),
-                                  counter: const Offstage(),
-                                ),
-                              ),
-                              suggestionsBoxDecoration:
-                                  const SuggestionsBoxDecoration(
-                                      hasScrollbar: true, color: Colors.white),
+                                );
+                              },
+
+                              // --- Suggestions Box Decoration Migration ---
+                              // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
+                              decorationBuilder: (context, child) {
+                                // Recreating the old SuggestionsBoxDecoration appearance (white color)
+                                return Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                  ),
+                                  child:
+                                      child, // The actual list of suggestions
+                                );
+                              },
+
+                              // suggestionsCallback remains the same (returns all items immediately)
                               suggestionsCallback: (pattern) {
                                 return slotsList;
                               },
+
+                              // itemBuilder remains the same
                               itemBuilder: (context, dynamic suggestion) {
                                 return suggestion != null
                                     ? ListTile(
@@ -2614,7 +2877,9 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                                       )
                                     : const SizedBox();
                               },
-                              onSuggestionSelected: (dynamic suggestion) {
+
+                              // Renamed from onSuggestionSelected to onSelected
+                              onSelected: (dynamic suggestion) {
                                 slotsController.text = suggestion.name ?? "";
                               },
                             ),
@@ -2862,7 +3127,10 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
   @override
   void showProgress() {
     // TODO: implement showProgress
-
+    if(!mounted){
+  return;
+    }
+      
     if (!isLoading) {
       isLoading = true;
       showDialog(
@@ -3120,6 +3388,7 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
   }
 
   void refresh() {
+    clearData();
     _presenter.initData();
   }
 

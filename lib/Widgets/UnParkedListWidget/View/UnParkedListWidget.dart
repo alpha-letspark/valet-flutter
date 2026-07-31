@@ -136,7 +136,7 @@ class _UnParkedListWidgetState extends State<UnParkedListWidget>
 
   @override
   Widget build(BuildContext context) {
-    errorColor ??= Theme.of(context).errorColor;
+    errorColor ??= Theme.of(context).colorScheme.error;
     blackColor ??= Colors.black;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
@@ -300,51 +300,62 @@ class _UnParkedListWidgetState extends State<UnParkedListWidget>
                             padding: const EdgeInsets.only(top: 8.0),
                             child: SizedBox(
                               height: 40,
-                              child: TypeAheadFormField(
-                                noItemsFoundBuilder: (context) {
+                              child: TypeAheadField(
+                                emptyBuilder: (context) {
                                   return const SizedBox();
                                 },
-                                getImmediateSuggestions: true,
                                 autoFlipDirection: true,
-                                textFieldConfiguration: TextFieldConfiguration(
-                                  onChanged: ((value) {
-                                    if (vehicleNameError && value != '') {
-                                      vehicleNameError = false;
-                                      setState(() {});
-                                    }
-                                  }),
-                                  controller: vehicleNameController,
-                                  textInputAction: TextInputAction.next,
-                                  decoration: InputDecoration(
-                                    labelStyle: vehicleNameError
-                                        ? TextStyle(color: errorColor)
-                                        : TextStyle(color: blackColor),
-                                    errorText: vehicleNameError
-                                        ? mandetoryFieldError
-                                        : null,
-                                    counter: const SizedBox(),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    filled: true,
-                                    hintText: Strings.UNASSIGNED,
-                                    fillColor: Colors.white,
-                                    hintStyle: const TextStyle(fontSize: 12),
-                                    border: const OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.black38),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color:
-                                            Theme.of(context).primaryColorDark,
+                                builder: (context, vehicleNameController,
+                                    focusNode) {
+                                  return TextField(
+                                    onChanged: ((value) {
+                                      if (vehicleNameError && value != '') {
+                                        vehicleNameError = false;
+                                        setState(() {});
+                                      }
+                                    }),
+                                    controller:
+                                        vehicleNameController, // Use the provided controller
+                                    focusNode:
+                                        focusNode, // Use the provided focusNode
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      labelStyle: vehicleNameError
+                                          ? TextStyle(color: errorColor)
+                                          : TextStyle(color: blackColor),
+                                      errorText: vehicleNameError
+                                          ? mandetoryFieldError
+                                          : null,
+                                      counter: const SizedBox(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                      filled: true,
+                                      hintText: Strings.UNASSIGNED,
+                                      fillColor: Colors.white,
+                                      hintStyle: const TextStyle(fontSize: 12),
+                                      border: const OutlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black38),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Theme.of(context)
+                                              .primaryColorDark,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                                suggestionsBoxDecoration:
-                                    const SuggestionsBoxDecoration(
-                                        hasScrollbar: true,
-                                        color: Colors.white),
+                                  );
+                                },
+                                decorationBuilder: (context, child) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                    ),
+                                    child:
+                                        child, // The actual list of suggestions
+                                  );
+                                },
                                 suggestionsCallback: (pattern) {
                                   if (pattern.isNotEmpty) {
                                     return _presenter
@@ -353,12 +364,10 @@ class _UnParkedListWidgetState extends State<UnParkedListWidget>
                                   return [];
                                 },
                                 itemBuilder: (context, dynamic suggestion) {
-                                  return suggestion != null
-                                      ? ListTile(
-                                          title: Text(suggestion.name ?? ""))
-                                      : const SizedBox();
+                                  return ListTile(
+                                      title: Text(suggestion.name ?? ""));
                                 },
-                                onSuggestionSelected: (dynamic suggestion) {
+                                onSelected: (dynamic suggestion) {
                                   vehicleNameController.text = suggestion.name;
                                   if (mounted) setState(() {});
                                 },
@@ -397,51 +406,63 @@ class _UnParkedListWidgetState extends State<UnParkedListWidget>
                             padding: const EdgeInsets.only(top: 8.0),
                             child: SizedBox(
                               height: 40,
-                              child: TypeAheadFormField(
-                                noItemsFoundBuilder: (context) {
+                              child: TypeAheadField(
+                                emptyBuilder: (context) {
                                   return const SizedBox();
                                 },
-                                getImmediateSuggestions: true,
                                 autoFlipDirection: true,
-                                textFieldConfiguration: TextFieldConfiguration(
-                                  onChanged: ((value) {
-                                    if (vehicleColorError && value != '') {
-                                      vehicleColorError = false;
-                                      setState(() {});
-                                    }
-                                  }),
-                                  controller: vehicleColorController,
-                                  textInputAction: TextInputAction.next,
-                                  decoration: InputDecoration(
-                                    labelStyle: vehicleColorError
-                                        ? TextStyle(color: errorColor)
-                                        : TextStyle(color: blackColor),
-                                    errorText: vehicleColorError
-                                        ? mandetoryFieldError
-                                        : null,
-                                    counter: const SizedBox(),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    filled: true,
-                                    hintText: Strings.UNASSIGNED,
-                                    fillColor: Colors.white,
-                                    hintStyle: const TextStyle(fontSize: 12),
-                                    border: const OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide(color: Colors.black38),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color:
-                                            Theme.of(context).primaryColorDark,
+                                builder: (context, vehicleColorController,
+                                    focusNode) {
+                                  return TextFormField(
+                                    onChanged: ((value) {
+                                      if (vehicleColorError && value != '') {
+                                        vehicleColorError = false;
+                                        setState(() {});
+                                      }
+                                    }),
+                                    controller:
+                                        vehicleColorController, 
+                                    focusNode:
+                                        focusNode,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      labelStyle: vehicleColorError
+                                          ? TextStyle(color: errorColor)
+                                          : TextStyle(color: blackColor),
+                                      errorText: vehicleColorError
+                                          ? mandetoryFieldError
+                                          : null,
+                                      counter: const SizedBox(),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                      filled: true,
+                                      hintText: Strings.UNASSIGNED,
+                                      fillColor: Colors.white,
+                                      hintStyle: const TextStyle(fontSize: 12),
+                                      border: const OutlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.black38),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color:
+                                          Theme.of(context).primaryColorDark,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                                suggestionsBoxDecoration:
-                                    const SuggestionsBoxDecoration(
-                                        hasScrollbar: true,
-                                        color: Colors.white),
+                                  );
+                                },
+
+                                decorationBuilder: (context, child) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                    ),
+                                    child:
+                                        child, 
+                                    );
+                                },
+
                                 suggestionsCallback: (pattern) {
                                   if (pattern.isNotEmpty) {
                                     return _presenter
@@ -456,7 +477,7 @@ class _UnParkedListWidgetState extends State<UnParkedListWidget>
                                               Text(suggestion.color_name ?? ""))
                                       : const SizedBox();
                                 },
-                                onSuggestionSelected: (dynamic suggestion) {
+                                onSelected: (dynamic suggestion) {
                                   vehicleColorController.text =
                                       suggestion.color_name ?? '';
                                   if (mounted) setState(() {});
@@ -1160,59 +1181,67 @@ class _UnParkedListWidgetState extends State<UnParkedListWidget>
                     Expanded(
                       child: SizedBox(
                         height: 45,
-                        child: TypeAheadFormField(
-                          noItemsFoundBuilder: (context) {
-                            return const SizedBox();
-                          },
-                          getImmediateSuggestions: true,
-                          autoFlipDirection: true,
-                          textFieldConfiguration: TextFieldConfiguration(
-                            controller: slotsController,
-                            onChanged: (text) {
-                              if (slotsError && text != '') {
-                                slotsError = false;
-                                setState(() {});
-                              }
-                            },
-                            decoration: InputDecoration(
-                              labelStyle: slotsError
-                                  ? TextStyle(color: errorColor)
-                                  : TextStyle(color: blackColor),
-                              errorText:
-                                  slotsError ? mandetoryFieldError : null,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 5),
-                              filled: true,
-                              fillColor: Colors.white,
-                              hintText: 'Type',
-                              hintStyle: const TextStyle(fontSize: 12),
-                              border: const OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.black38)),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Theme.of(context).primaryColorDark,
-                                ),
-                              ),
-                              counter: const Offstage(),
-                            ),
-                          ),
-                          suggestionsBoxDecoration:
-                              const SuggestionsBoxDecoration(
-                                  hasScrollbar: true, color: Colors.white),
-                          suggestionsCallback: (pattern) {
-                            return slotsList;
-                          },
-                          itemBuilder: (context, dynamic suggestion) {
-                            return suggestion != null
-                                ? ListTile(
-                                    title: Text(suggestion.name ?? ""),
-                                  )
-                                : const SizedBox();
-                          },
-                          onSuggestionSelected: (dynamic suggestion) {
-                            slotsController.text = suggestion.name ?? "";
-                          },
+                        child:TypeAheadField(
+  emptyBuilder: (context) {
+    return const SizedBox();
+  },
+  autoFlipDirection: true,
+  builder: (context, slotsController, focusNode) {
+    return TextFormField(
+      controller: slotsController, // Use the provided controller
+      focusNode: focusNode,       // Use the provided focusNode
+      onChanged: (text) {
+        if (slotsError && text != '') {
+          slotsError = false;
+          setState(() {}); 
+        }
+      },
+      decoration: InputDecoration(
+        labelStyle: slotsError
+            ? TextStyle(color: errorColor)
+            : TextStyle(color: blackColor),
+        errorText:
+            slotsError ? mandetoryFieldError : null,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 5),
+        filled: true,
+        fillColor: Colors.white,
+        hintText: 'Type',
+        hintStyle: const TextStyle(fontSize: 12),
+        border: const OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Colors.black38)),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Theme.of(context).primaryColorDark,
+          ),
+        ),
+        counter: const Offstage(),
+      ),
+    );
+  },
+  decorationBuilder: (context, child) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+      ),
+      child: child, // The actual list of suggestions
+    );
+  },
+  suggestionsCallback: (pattern) {
+    return slotsList;
+  },
+  itemBuilder: (context, dynamic suggestion) {
+    return suggestion != null
+        ? ListTile(
+            title: Text(suggestion.name ?? ""),
+          )
+        : const SizedBox();
+  },
+  
+  onSelected: (dynamic suggestion) {
+    slotsController.text = suggestion.name ?? "";
+  },
                         ),
                       ),
                     ),

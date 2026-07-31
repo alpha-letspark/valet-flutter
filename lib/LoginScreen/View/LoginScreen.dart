@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -45,8 +46,10 @@ class _LoginScreenState extends State<LoginScreen> implements LoginScreenView {
     connectionStatus = ConnectionStatusSingleton.getInstance();
     connectionStatus.initialize();
 
-    userNameController.text = 'Wmvalet';
-    passwordController.text = "windmills@123";
+    if(kDebugMode){
+      userNameController.text = 'Wmvalet';
+      passwordController.text = "windmills@123";
+    }
     checkVersion();
     WidgetsBinding.instance!.addPostFrameCallback((_) => _presenter.initData());
   }
@@ -269,6 +272,13 @@ class _LoginScreenState extends State<LoginScreen> implements LoginScreenView {
 
   @override
   void askPermission() async {
+     bool isOpt = await OneSignal.Notifications.requestPermission(true);
+    if (isOpt) {
+      OneSignal.User.pushSubscription.optIn();
+    } else {
+      OneSignal.User.pushSubscription.optOut();
+    }
+
     PermissionStatus status = await Permission.camera.request();
 
     if (status.isPermanentlyDenied) {
@@ -277,12 +287,7 @@ class _LoginScreenState extends State<LoginScreen> implements LoginScreenView {
       askPermission();
       return;
     }
-    bool isOpt = await OneSignal.Notifications.requestPermission(true);
-    if (isOpt) {
-      OneSignal.User.pushSubscription.optIn();
-    } else {
-      OneSignal.User.pushSubscription.optOut();
-    }
+
     _presenter.getPlayerId();
   }
 }

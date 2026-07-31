@@ -2,9 +2,11 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:valet_app/Data/BaseResponse.dart';
 import 'package:valet_app/Data/Request/LoginRequest.dart';
 import 'package:valet_app/Data/Request/RolePermissionRequest.dart';
+import 'package:valet_app/Data/Request/SaveDeviceTokenRequest.dart';
 import 'package:valet_app/Data/Response/InputFieldResponse.dart';
 import 'package:valet_app/Data/Response/LoginResponse.dart';
 import 'package:valet_app/Data/Response/RolePermissionResponse.dart';
+import 'package:valet_app/Data/Response/SaveDeviceTokenResponse.dart';
 import 'package:valet_app/LoginScreen/Presenter/LoginScreenPresenter.dart';
 import 'package:valet_app/LoginScreen/View/LoginScreenView.dart';
 import 'package:valet_app/base/base_presenter.dart';
@@ -23,7 +25,12 @@ class LoginScreenPresenterImpl extends BasePresenter<LoginScreenView>
 
   @override
   void getPlayerId() {
-    playerId = OneSignal.User.pushSubscription.id ?? '';
+    OneSignal.User.pushSubscription.addObserver((state) {
+      playerId = state.current.id ?? OneSignal.User.pushSubscription.id ?? '';
+      if (playerId != null) {
+        print("Player Id New $playerId");
+      }
+    });
   }
 
   @override
@@ -34,10 +41,32 @@ class LoginScreenPresenterImpl extends BasePresenter<LoginScreenView>
       getView()?.showProgress();
       request.player_id =
           playerId == '' ? OneSignal.User.pushSubscription.id ?? '' : playerId;
+          print("Before login");
 
-      BaseResponse? baseResponse = await apiClientImpl.login(request);
+BaseResponse? baseResponse = await apiClientImpl.login(request);
+
+print("After login");
+//print(response);
+
+      //BaseResponse? baseResponse = await apiClientImpl.login(request);
+
+      //BaseResponse? baseResponse = await apiClientImpl.login(request);
+
+print("BaseResponse: $baseResponse");
+print("Error Code: ${baseResponse?.errorCode}");
+//print("Error Message: ${baseResponse?.e}");
+print("Data: ${baseResponse?.data}");
+
+if (baseResponse != null) {
+  LoginResponse? response = baseResponse.data;
+  print("LoginResponse: $response");
+  print("LoginResponse.data: ${response?.data}");
+
+  
+}
       if (baseResponse != null) {
         LoginResponse? response = baseResponse.data;
+        print('BASERESPOSE DATA------->>>${response?.data}');
         if (response != null) {
           if ((response.status ?? -1) == 0) {
             getView()?.showErrorMsg(response.message);
@@ -46,7 +75,8 @@ class LoginScreenPresenterImpl extends BasePresenter<LoginScreenView>
           } else {
             getView()?.hideProgress();
             apiClientImpl.setLoginData(response);
-            getRolePermissionData(response);
+            saveDeviceToken(response);
+           
           }
         } else {
           if (baseResponse.errorCode == 401) {
@@ -185,4 +215,48 @@ class LoginScreenPresenterImpl extends BasePresenter<LoginScreenView>
     }
     return;
   }
+
+  void saveDeviceToken(LoginResponse response) async {
+  SaveDeviceTokenRequest request = SaveDeviceTokenRequest();
+
+  request.client_id = (response.data?.client_id ?? 0).toString();
+  request.user_id = (response.data?.id ?? 0).toString();
+
+  // Always use the latest OneSignal Push Subscription ID
+  final pushId = OneSignal.User.pushSubscription.id ?? '';
+
+  request.player_id = pushId;
+
+  print("Saving Player ID: $pushId");
+  print("Current Push ID: ${OneSignal.User.pushSubscription.id}");
+
+  BaseResponse? baseResponse = await apiClientImpl.saveDeviceToken(request);
+
+  if (baseResponse != null) {
+    SaveDeviceTokenResponse? tokenResponse = baseResponse.data;
+    if (tokenResponse != null) {
+      getView()?.hideProgress();
+    }
+  }
+
+  getRolePermissionData(response);
+}
+
+//   void saveDeviceToken(LoginResponse response) async {
+//     SaveDeviceTokenRequest request = SaveDeviceTokenRequest();
+//     request.client_id = (response.data?.client_id ?? 0).toString();
+//     request.user_id = (response.data?.id ?? 0).toString();
+//     request.player_id = playerId;
+//     print("Saving Player ID: $playerId");
+// print("Current Push ID: ${OneSignal.User.pushSubscription.id}");
+
+//     BaseResponse? baseResponse = await apiClientImpl.saveDeviceToken(request);
+//     if (baseResponse != null) {
+//       SaveDeviceTokenResponse? tokenResponse = baseResponse.data;
+//       if (tokenResponse != null) {
+//         getView()?.hideProgress();
+//       }
+//     }
+//      getRolePermissionData(response);
+//   }
 }

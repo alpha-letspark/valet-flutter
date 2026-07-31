@@ -14,6 +14,7 @@ import 'package:valet_app/Data/Request/ParkedLocationUpdate.dart';
 import 'package:valet_app/Data/Request/RolePermissionRequest.dart';
 import 'package:valet_app/Data/Request/SMSBasedEntryRequest.dart';
 import 'package:valet_app/Data/Request/SMSBasedUpdateRequest.dart';
+import 'package:valet_app/Data/Request/SaveDeviceTokenRequest.dart';
 import 'package:valet_app/Data/Request/SearchGuestRequest.dart';
 import 'package:valet_app/Data/Request/SettingRequest.dart';
 import 'package:valet_app/Data/Response/CheckHookNumberResponse.dart';
@@ -32,6 +33,7 @@ import 'package:valet_app/Data/Response/ParkingDetailsResponse.dart';
 import 'package:valet_app/Data/Response/ParkingLocationResponse.dart';
 import 'package:valet_app/Data/Response/PermissionResponse.dart';
 import 'package:valet_app/Data/Response/RolePermissionResponse.dart';
+import 'package:valet_app/Data/Response/SaveDeviceTokenResponse.dart';
 import 'package:valet_app/Data/Response/ScanNumberPlateResponse.dart';
 import 'package:valet_app/Data/Response/SearchGuestResponse.dart';
 import 'package:valet_app/Data/Response/SettingResponse.dart';
@@ -170,16 +172,52 @@ class ApiClientImpl {
   }
 
   Future<BaseResponse<LoginResponse>> login(LoginRequest request) async {
-    LoginResponse? response;
-    try {
-      response = await client.login(request);
-    } catch (error, stacktrace) {
-      printMessage("Exception occured: $error stackTrace: $stacktrace");
-      return BaseResponse()
-        ..setException(ServerError.withError(error, error: error as DioError));
-    }
+  print("========== LOGIN ==========");
+  print("Request: ${request.toJson()}");
+
+  LoginResponse? response;
+
+  try {
+    response = await client.login(request);
+
+    print("SUCCESS");
+    print(response);
+
     return BaseResponse()..data = response;
+  } catch (error, stacktrace) {
+  print("========== ERROR ==========");
+  print(error);
+
+  if (error is DioException) {
+    print("Status Code : ${error.response?.statusCode}");
+    print("Response    : ${error.response?.data}");
+    print("Request URL : ${error.requestOptions.uri}");
+    print("Headers     : ${error.requestOptions.headers}");
+
+    return BaseResponse()
+      ..setException(
+        ServerError.withError(error, error: error),
+      );
   }
+
+  print(stacktrace);
+
+  rethrow; // or handle non-Dio exceptions separately
+}
+}
+
+  // Future<BaseResponse<LoginResponse>> login(LoginRequest request) async {
+  //   print("Login check");
+  //   LoginResponse? response;
+  //   try {
+  //     response = await client.login(request);
+  //   } catch (error, stacktrace) {
+  //     printMessage("Exception occured: $error stackTrace: $stacktrace");
+  //     return BaseResponse()
+  //       ..setException(ServerError.withError(error, error: error as DioError));
+  //   }
+  //   return BaseResponse()..data = response;
+  // }
 
   //input_permission
   Future<BaseResponse<InputFieldResponse>> getInputPermissionData(
@@ -722,6 +760,19 @@ class ApiClientImpl {
             rcCard,
             aadhar);
       }
+    } catch (error, stacktrace) {
+      printMessage("Exception occured: $error stackTrace: $stacktrace");
+      return BaseResponse()
+        ..setException(ServerError.withError(error, error: error as DioError));
+    }
+    return BaseResponse()..data = response;
+  }
+
+  Future<BaseResponse<SaveDeviceTokenResponse>> saveDeviceToken(
+      SaveDeviceTokenRequest req) async {
+    SaveDeviceTokenResponse? response;
+    try {
+      response = await client.saveDeviceToken(req);
     } catch (error, stacktrace) {
       printMessage("Exception occured: $error stackTrace: $stacktrace");
       return BaseResponse()

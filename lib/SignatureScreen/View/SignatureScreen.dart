@@ -78,29 +78,31 @@ class _SignatureScreenState extends State<SignatureScreen>
         body: Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
               height: 10,
             ),
             Expanded(
-                flex: 6,
+                flex: 5,
                 child: SingleChildScrollView(child: Html(data: htmlText))),
-            const SizedBox(
-              height: 10,
-            ),
+            // const SizedBox(
+            //   height: 10,
+            // ),
             Expanded(
               flex: 4,
               child: Stack(
                 children: [
                   Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey)),
                       child: SfSignaturePad(
                           key: signatureGlobalKey,
                           backgroundColor: Colors.white,
                           strokeColor: Colors.black,
                           minimumStrokeWidth: 1.0,
-                          maximumStrokeWidth: 4.0),
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey))),
+                          maximumStrokeWidth: 4.0)),
                   Align(
                     alignment: Alignment.topRight,
                     child: TextButton(
@@ -113,21 +115,19 @@ class _SignatureScreenState extends State<SignatureScreen>
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            //const SizedBox(height: 10),
             Expanded(
               flex: 1,
-              child: Row(children: <Widget>[
+              child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <Widget>[
                 Expanded(
                   child: ElevatedButton(
-                    child: const Text('Save'),
                     onPressed: _handleSaveButtonPressed,
+                    child: const Text('Save'),
                   ),
                 ),
-              ], mainAxisAlignment: MainAxisAlignment.spaceEvenly),
+              ]),
             )
-          ],
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center),
+          ]),
     ));
   }
 

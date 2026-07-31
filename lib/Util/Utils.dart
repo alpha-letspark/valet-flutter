@@ -9,7 +9,7 @@ class Utils {
   static bool isNotification = false;
   static const Color orangeColor = Color(0xFFF26424);
   static showToastMsg(String msg,
-      {Color textColor: Colors.white, Color backgroundColor: orangeColor}) {
+      {Color textColor = Colors.white, Color backgroundColor= orangeColor}) {
     Fluttertoast.showToast(
       msg: msg,
       toastLength: Toast.LENGTH_LONG,

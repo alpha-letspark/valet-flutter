@@ -2,7 +2,7 @@ class Strings {
   static const String APP_NAME = "Windmills";
   static const String USER_NAME = "Username";
   static const String PASSWORD = "Password";
-  static const String CHECK_IN = "CHECK-IN";
+  static const String CHECK_IN = "Unparked";
   static const String CHECK_IN_COUNT = "02";
   static const String CHECK_OUT = "CHECK-OUT";
   static const String CHECK_OUT_COUNT = "03";
@@ -38,7 +38,7 @@ class Strings {
   static const String SEARCH_SUGGESTION = "Search suggest";
   static const String PARKED = "Parked";
   static const String UNPARKED = "Unparked";
-  static const String GUEST_REQUEST = "Guest Request";
+  static const String GUEST_REQUEST = "Request";
   static const String EXIT = "Exit";
   static const String ETA = "ETA";
   static const String VEHICLE_NUMBER = "Vehicle Number";
@@ -66,7 +66,7 @@ class Strings {
   static const String Parked_By = "Parked By";
   static const String PICKED_UP_By = "Pickup By ";
 
-  static const String SEARCH_VEHHICLE_MOBILE_HOOK = "VEHICLE | MOBILE | HOOK";
+  static const String SEARCH_VEHHICLE_MOBILE_HOOK = "VEHICLE | MOBILE | HN";
   static const String SEARCH_PIN = "PIN";
   static const String ACCEPT = "Accept";
   static const String VEHICLE_NAME = "Vehicle Name";

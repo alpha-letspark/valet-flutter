@@ -41,12 +41,12 @@ class _AppBarWidgetState extends State<AppBarWidget>
   Widget build(BuildContext context) {
     return Row(children: [
       Expanded(
-        flex: 1,
+        flex: 2,
         child: Row(
           children: [
             Padding(
               padding: const EdgeInsets.all(10.0),
-              child: Container(
+              child: SizedBox(
                 height: 50,
                 width: 70,
                 child: Image.network(
@@ -102,26 +102,31 @@ class _AppBarWidgetState extends State<AppBarWidget>
                       size: 30,
                     ),
                     onPressed: () {
-                      isNewEntryClicked = true;
-                      widget.onNewEntryClick();
-                    },
+  print("PLUS BUTTON CLICKED");
+  isNewEntryClicked = true;
+  widget.onNewEntryClick();
+}
+                    // onPressed: () {
+                    //   isNewEntryClicked = true;
+                    //   widget.onNewEntryClick();
+                    // },
                   ),
                 ),
                 const SizedBox(
                   width: 15,
                 ),
-                InkWell(
-                    onTap: () {
-                      isSyncClicked = true;
-                      widget.onRefreshClick();
-                    },
-                    child: Image.asset(
-                      "images/ActiveRefresh.png",
-                      height: 30,
-                    )),
-                const SizedBox(
-                  width: 15,
-                ),
+                // InkWell(
+                //     onTap: () {
+                //       isSyncClicked = true;
+                //       widget.onRefreshClick();
+                //     },
+                //     child: Image.asset(
+                //       "images/ActiveRefresh.png",
+                //       height: 30,
+                //     )),
+                // const SizedBox(
+                //   width: 15,
+                // ),
                 InkWell(
                     onTap: () {
                       isMenuClicked = true;
