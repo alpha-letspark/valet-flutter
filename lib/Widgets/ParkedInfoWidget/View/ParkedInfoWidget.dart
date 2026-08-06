@@ -42,6 +42,7 @@ class _ParkingInfoWidgetState extends State<ParkingInfoWidget>
   int selectedParkingId = 0;
   String selectedParkingName = '';
   String searchString = '';
+  int selectedLocationIndex = 0;
 
   _ParkingInfoWidgetState() {
     _presenter = ParkedInfoWidgetPresenterImpl();
@@ -89,55 +90,117 @@ class _ParkingInfoWidgetState extends State<ParkingInfoWidget>
             ),
           ),
         ),
-        Expanded(
-          flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: ListView.builder(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemCount: _locations.length,
-              itemBuilder: (BuildContext context, int index) => InkWell(
-                onTap: () {
-                  selectedParkingId = _locations[index].id ?? 0;
-                  selectedParkingName = _locations[index].name ?? '';
+      Expanded(
+  flex: 1,
+  child: Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 5),
+    child: ListView.builder(
+      shrinkWrap: true,
+      scrollDirection: Axis.horizontal,
+      itemCount: _locations.length,
+      itemBuilder: (BuildContext context, int index) {
 
-                  if (mounted) setState(() {});
-                },
-                child: Card(
-                  color: HexColor(_locations[index].color_code ?? ''),
-                  child: RotatedBox(
-                      quarterTurns: 3,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 20, horizontal: 10),
-                        child: Wrap(
-                          direction: Axis.horizontal,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: Text(
-                                _locations[index].name ?? '',
-                                style: const TextStyle(
-                                    fontSize: 20, color: Colors.white),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: Text(
-                                _locations[index].capacity ?? '',
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
-                            ),
-                          ],
+        bool isSelected = selectedLocationIndex == index;
+
+        return InkWell(
+          onTap: () {
+
+            setState(() {
+
+              selectedLocationIndex = index;
+
+              selectedParkingId =
+                  _locations[index].id ?? 0;
+
+              selectedParkingName =
+                  _locations[index].name ?? '';
+
+            });
+
+          },
+          child: Card(
+
+            elevation: isSelected ? 8 : 2,
+
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                color: isSelected
+                    ? Colors.black
+                    : Colors.transparent,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+
+            color: HexColor(
+              _locations[index].color_code ?? '',
+            ),
+
+            child: RotatedBox(
+              quarterTurns: 3,
+
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10),
+
+                child: Wrap(
+                  direction: Axis.horizontal,
+
+                  children: [
+
+                    Padding(
+                      padding:
+                          const EdgeInsets.all(2.0),
+
+                      child: Text(
+                        _locations[index].name ?? '',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight:
+                              FontWeight.bold,
                         ),
-                      )),
+                      ),
+                    ),
+
+                    Padding(
+                      padding:
+                          const EdgeInsets.all(2.0),
+
+                      child: Text(
+                        _locations[index].capacity ?? '',
+                        style:
+                            const TextStyle(
+                          color:
+                              Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+
+                    if(isSelected)
+                      const Padding(
+                        padding:
+                            EdgeInsets.all(2),
+
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      )
+                  ],
                 ),
               ),
             ),
           ),
-        ),
+        );
+      },
+    ),
+  ),
+),
         buildGridView(),
       ],
     );
@@ -283,10 +346,17 @@ class _ParkingInfoWidgetState extends State<ParkingInfoWidget>
 
     _locations = locationList;
     _carDetails = parkingList;
-    if (_locations.length > 1) {
-      selectedParkingId = _locations[0].id ?? 0;
-      selectedParkingName = _locations[0].name ?? "";
-    }
+   if (_locations.isNotEmpty) {
+
+  selectedLocationIndex = 0;
+
+  selectedParkingId =
+      _locations[0].id ?? 0;
+
+  selectedParkingName =
+      _locations[0].name ?? "";
+
+}
     if (mounted) setState(() {});
   }
 

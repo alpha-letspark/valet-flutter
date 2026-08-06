@@ -1851,119 +1851,123 @@ class _NewVehicleEntryState extends State<NewVehicleEntry>
                 width: 5,
               ),
             ),
-            Visibility(
-              visible: checkCardBaseField(Strings.MAND_VEHICLE_NUMBER),
-              child: Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: SizedBox(
-                    height: 50,
-                    child: TypeAheadField(
-                      controller: vehicalNumberController,
-                      // Renamed from noItemsFoundBuilder
-                      emptyBuilder: (context) {
-                        return const SizedBox();
-                      },
-                      // getImmediateSuggestions is removed. Logic remains the same (suggestions only on non-empty pattern).
+           Visibility(
+  visible: checkCardBaseField(Strings.MAND_VEHICLE_NUMBER),
+  child: Expanded(
+    child: Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: SizedBox(
+        height: 50,
+        child: TypeAheadField(
+          controller: vehicalNumberController,
 
-                      // autoFlipDirection remains the same
-                      autoFlipDirection: true,
+          // Remove loader from suggestion box
+          loadingBuilder: (context) {
+            return const SizedBox();
+          },
 
-                      // --- TextField Configuration Migration ---
-                      // Replaced textFieldConfiguration with the required 'builder' property.
-                      builder: (context, vehicalNumberController, focusNode) {
-                        return TextFormField(
-                          // Keep properties that define input behavior
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.allow(
-                                RegExp(r'[a-zA-Z0-9]')),
-                          ],
-                          maxLength: 10,
+          emptyBuilder: (context) {
+            return const SizedBox();
+          },
 
-                          controller:
-                              vehicalNumberController, // Use the provided controller
-                          focusNode: focusNode, // Use the provided focusNode
-                          textInputAction: TextInputAction.next,
+          autoFlipDirection: true,
 
-                          onChanged: (value) {
-                            if (vehicleNumberError && value != '') {
-                              vehicleNumberError = false;
-                              // Assuming setState is available in the surrounding State
-                              setState(() {});
-                            }
-                          },
-                          decoration: InputDecoration(
-                            labelStyle: vehicleNumberError
-                                ? TextStyle(color: errorColor)
-                                : TextStyle(color: blackColor),
-                            errorText:
-                                vehicleNumberError ? mandetoryFieldError : null,
-                            counter:
-                                const SizedBox(), // Replaces the counter from TextFieldConfiguration
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 10),
-                            filled: true,
-                            hintText: 'KA01MM1234',
-                            fillColor: Colors.white,
-                            hintStyle: const TextStyle(fontSize: 12),
-                            border: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black38),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Theme.of(context).primaryColorDark,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+          builder: (context, vehicalNumberController, focusNode) {
+            return TextFormField(
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'[a-zA-Z0-9]'),
+                ),
+              ],
+              maxLength: 10,
 
-                      // --- Suggestions Box Decoration Migration ---
-                      // suggestionsBoxDecoration is gone, replaced by decorationBuilder.
-                      decorationBuilder: (context, child) {
-                        return Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                          ),
-                          child: child, // The actual list of suggestions
-                        );
-                      },
+              controller: vehicalNumberController,
+              focusNode: focusNode,
+              textInputAction: TextInputAction.next,
 
-                      // suggestionsCallback remains the same
-                      suggestionsCallback: (pattern) {
-                        if (pattern.isNotEmpty) {
-                          return _presenter.searchGuestDetails(pattern);
-                        }
-                        return [];
-                      },
+              onChanged: (value) {
+                if (vehicleNumberError && value != '') {
+                  vehicleNumberError = false;
+                  setState(() {});
+                }
+              },
 
-                      // itemBuilder remains the same
-                      itemBuilder: (context, dynamic suggestion) {
-                        return suggestion != null
-                            ? ListTile(
-                                title: Text(suggestion.display_string ?? ""))
-                            : const SizedBox();
-                      },
+              decoration: InputDecoration(
+                labelStyle: vehicleNumberError
+                    ? TextStyle(color: errorColor)
+                    : TextStyle(color: blackColor),
 
-                      // Renamed from onSuggestionSelected to onSelected
-                      onSelected: (dynamic suggestion) {
-                        if (mounted) setState(() {});
+                errorText:
+                    vehicleNumberError ? mandetoryFieldError : null,
 
-                        // Suggestion logic preserved
-                        // NOTE: You'll need access to SearchGuestData, selectedCarIndex, and the other controllers
-                        // (mobileNumberController, nameController) outside this widget to use this logic fully.
-                        SearchGuestData data = suggestion;
-                        // mobileNumberController.text = data.mobile_number ?? ""; // Commented out as these controllers were not in the provided snippet's scope
-                        // nameController.text = data.customer_name ?? '';
-                        selectedCarIndex =
-                            int.tryParse(data.vehicle_type ?? '0') ?? 0;
-                        vehicalNumberController.text =  data.vehicle_number ?? '';
-                      },
-                    ),
+                counter: const SizedBox(),
+
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10),
+
+                filled: true,
+                fillColor: Colors.white,
+
+                hintText: 'KA01MM1234',
+                hintStyle: const TextStyle(fontSize: 12),
+
+                border: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black38),
+                ),
+
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColorDark,
                   ),
                 ),
               ),
-            ),
+            );
+          },
+
+          decorationBuilder: (context, child) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
+              child: child,
+            );
+          },
+
+          suggestionsCallback: (pattern) {
+            if (pattern.isNotEmpty) {
+              return _presenter.searchGuestDetails(pattern);
+            }
+            return [];
+          },
+
+          itemBuilder: (context, dynamic suggestion) {
+            return suggestion != null
+                ? ListTile(
+                    title: Text(
+                      suggestion.display_string ?? "",
+                    ),
+                  )
+                : const SizedBox();
+          },
+
+          onSelected: (dynamic suggestion) {
+            if (mounted) {
+              setState(() {});
+            }
+
+            SearchGuestData data = suggestion;
+
+            selectedCarIndex =
+                int.tryParse(data.vehicle_type ?? '0') ?? 0;
+
+            vehicalNumberController.text =
+                data.vehicle_number ?? '';
+          },
+        ),
+      ),
+    ),
+  ),
+),
           ],
         ),
         Visibility(

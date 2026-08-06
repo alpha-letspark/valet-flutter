@@ -40,8 +40,10 @@ class _HistoryScreenState extends State<HistoryScreen>
     tabController = TabController(vsync: this, length: 2);
     connectionStatus = ConnectionStatusSingleton.getInstance();
     connectionStatus.initialize();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => _presenter.initData());
-
+     WidgetsBinding.instance!.addPostFrameCallback((_) {
+  print("HISTORY SCREEN: initData called");
+  _presenter.initData();
+});
     super.initState();
   }
 

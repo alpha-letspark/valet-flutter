@@ -228,10 +228,12 @@ abstract class ApiClient {
     @Part(name: "client_id") String clientId,
   );
 
-  @GET("/history_counts")
-  Future<HistoryCountResponse> getHistoryCount(
-      @Body() HistoryCountRequest request);
-
+  // @GET("/history_counts")
+  // Future<HistoryCountResponse> getHistoryCount(
+  //     @Body() HistoryCountRequest request);
+@GET("/history_counts")
+Future<HistoryCountResponse> getHistoryCount(
+    @Query("client_id") String clientId);
   @POST("/lostcard_store")
   @MultiPart()
   Future<LPBaseResponse> cardLoss(

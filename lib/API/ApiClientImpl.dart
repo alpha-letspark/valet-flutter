@@ -114,6 +114,7 @@ class ApiClientImpl {
       options.headers["Authorization"] =
           "${response!.token_type} ${response!.access_token}";
     }
+    print("Authorization: ${options.headers["Authorization"]}");
     options.headers["Content-Type"] = "application/json";
 
     if (options.headers != null) {
@@ -178,12 +179,22 @@ class ApiClientImpl {
   LoginResponse? response;
 
   try {
+    // response = await client.login(request);
+
+    // print("SUCCESS");
+    // print(response);
+
+    // return BaseResponse()..data = response;
+
     response = await client.login(request);
 
-    print("SUCCESS");
-    print(response);
+print("========== LOGIN SUCCESS ==========");
+print("Client ID : ${response?.data?.client_id}");
+print("User ID   : ${response?.data?.id}");
+print("Token Type: ${response?.token_type}");
+print("Access Token: ${response?.access_token}");
 
-    return BaseResponse()..data = response;
+return BaseResponse()..data = response;
   } catch (error, stacktrace) {
   print("========== ERROR ==========");
   print(error);
@@ -336,18 +347,43 @@ class ApiClientImpl {
     return BaseResponse()..data = response;
   }
 
+  // Future<BaseResponse<HistoryResponse>> getHistoryData(
+  //     String clientId, String date) async {
+  //   HistoryResponse? response;
+  //   try {
+  //     response = await client.getHistoryData(clientId, date);
+  //   } catch (error, stacktrace) {
+  //     printMessage("Exception occured: $error stackTrace: $stacktrace");
+  //     return BaseResponse()
+  //       ..setException(ServerError.withError(error, error: error as DioError));
+  //   }
+  //   return BaseResponse()..data = response;
+  // }
+
   Future<BaseResponse<HistoryResponse>> getHistoryData(
-      String clientId, String date) async {
-    HistoryResponse? response;
-    try {
-      response = await client.getHistoryData(clientId, date);
-    } catch (error, stacktrace) {
-      printMessage("Exception occured: $error stackTrace: $stacktrace");
-      return BaseResponse()
-        ..setException(ServerError.withError(error, error: error as DioError));
-    }
-    return BaseResponse()..data = response;
+    String clientId, String date) async {
+
+  print("========== HISTORY API ==========");
+  print("Client ID : $clientId");
+  print("Date      : $date");
+
+  HistoryResponse? response;
+  try {
+    response = await client.getHistoryData(clientId, date);
+
+    print("========== HISTORY RESPONSE ==========");
+    print(response?.toJson()); // or print(response);
+  } catch (error, stacktrace) {
+    print("========== HISTORY ERROR ==========");
+    print(error);
+    printMessage("Exception occured: $error stackTrace: $stacktrace");
+
+    return BaseResponse()
+      ..setException(ServerError.withError(error, error: error as DioError));
   }
+
+  return BaseResponse()..data = response;
+}
 
   Future<BaseResponse<ParkedInfoResponse>> getParkingListInformation(
       String clientId) async {
@@ -714,18 +750,44 @@ class ApiClientImpl {
     return BaseResponse()..data = response;
   }
 
+  // Future<BaseResponse<HistoryCountResponse>> getHistoryCount(
+  //     HistoryCountRequest req) async {
+  //   HistoryCountResponse? response;
+  //   try {
+  //     response = await client.getHistoryCount(req);
+  //   } catch (error, stacktrace) {
+  //     printMessage("Exception occured: $error stackTrace: $stacktrace");
+  //     return BaseResponse()
+  //       ..setException(ServerError.withError(error, error: error as DioError));
+  //   }
+  //   return BaseResponse()..data = response;
+  // }
+
   Future<BaseResponse<HistoryCountResponse>> getHistoryCount(
-      HistoryCountRequest req) async {
-    HistoryCountResponse? response;
-    try {
-      response = await client.getHistoryCount(req);
-    } catch (error, stacktrace) {
-      printMessage("Exception occured: $error stackTrace: $stacktrace");
-      return BaseResponse()
-        ..setException(ServerError.withError(error, error: error as DioError));
-    }
-    return BaseResponse()..data = response;
+    HistoryCountRequest req) async {
+
+  HistoryCountResponse? response;
+
+  try {
+    response = await client.getHistoryCount(
+      req.client_id ?? "",
+    );
+
+  } catch (error, stacktrace) {
+    printMessage(
+        "Exception occured: $error stackTrace: $stacktrace");
+
+    return BaseResponse()
+      ..setException(
+        ServerError.withError(
+          error,
+          error: error as DioError,
+        ),
+      );
   }
+
+  return BaseResponse()..data = response;
+}
 
   Future<BaseResponse<LPBaseResponse>> cardLoss(
       String clientId,

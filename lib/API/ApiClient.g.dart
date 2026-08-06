@@ -1190,14 +1190,11 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<HistoryCountResponse> getHistoryCount(
-    HistoryCountRequest request,
-  ) async {
+  Future<HistoryCountResponse> getHistoryCount(String clientId) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'client_id': clientId};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(request.toJson());
+    const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<HistoryCountResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(

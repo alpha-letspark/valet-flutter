@@ -20,5 +20,6 @@ ThemeData basicTheme() {
     primaryColor: const Color(0xffFF7900),
     primaryColorDark: const Color(0xff007C84),
     primaryColorLight: const Color.fromARGB(255, 5, 165, 176),
+     scaffoldBackgroundColor: Colors.white,
   );
 }
